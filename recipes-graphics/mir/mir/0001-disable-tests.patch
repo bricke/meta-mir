@@ -1,0 +1,14 @@
+From: meta-mir <meta-mir@placeholder>
+Date: Fri, 01 Jan 2021 00:00:00 +0000
+Subject: [PATCH] Disable test-only subdirectories for embedded builds
+
+Removes test subdirectories that pull in heavy test-only dependencies
+(gtest, wlcs, umockdev, python3-pillow) not needed for embedded targets.
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1 +1 @@
+-# placeholder: adjust hunk offsets after pinning to real tag
++# This patch file is a placeholder. Once the exact Mir release tag is pinned,
++# replace this with the real patch disabling the tests/ and spread-tests/
++# subdirectories from CMakeLists.txt if -DMIR_ENABLE_TESTS=OFF is insufficient.
