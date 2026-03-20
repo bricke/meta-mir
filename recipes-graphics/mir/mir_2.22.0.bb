@@ -4,10 +4,10 @@ HOMEPAGE = "https://github.com/canonical/mir"
 LICENSE = "GPL-2.0-only & LGPL-2.1-only & MIT"
 LIC_FILES_CHKSUM = "file://COPYING;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 
-SRC_URI = "git://github.com/canonical/mir.git;protocol=https;tag=v${PV};branch=main \
+SRC_URI = "git://github.com/canonical/mir.git;protocol=https;branch=main \
            file://0001-disable-tests.patch \
 "
-SRCREV = "${AUTOREV}"
+SRCREV = "a73013b3f287b96b89885945e7b2461334f47363"
 S = "${WORKDIR}/git"
 
 inherit cmake pkgconfig
