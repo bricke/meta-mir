@@ -116,3 +116,7 @@ bitbake mir
 - Tests and examples disabled
 - `mir_wayland_generator` is built natively (x86_64) to avoid cross-compilation exec format errors
 - `libxml++-2.6` uses `std::auto_ptr` which is deprecated in C++23 — `-Wno-deprecated-declarations` is applied to the Mir build to suppress the `-Werror` failure
+- `lttng-gen-tp` is provided by `liblttng-ust-dev` (not `lttng-tools`). Bitbake's `HOSTTOOLS` mechanism does not reliably expose the tool to ninja subprocesses, so the recipe pre-generates the `.tp` outputs in `do_compile:prepend` using the full path `/usr/bin/lttng-gen-tp`. If for any reason the pre-generation fails, you can also manually create the symlink that `HOSTTOOLS` should have created:
+  ```bash
+  ln -sf /usr/bin/lttng-gen-tp ~/workspace/yocto/build/tmp/hosttools/lttng-gen-tp
+  ```
