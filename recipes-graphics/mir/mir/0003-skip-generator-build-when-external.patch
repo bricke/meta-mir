@@ -1,0 +1,15 @@
+diff --git a/src/wayland/CMakeLists.txt b/src/wayland/CMakeLists.txt
+index acc3e2c..238fdb5 100644
+--- a/src/wayland/CMakeLists.txt
++++ b/src/wayland/CMakeLists.txt
+@@ -2,7 +2,9 @@ set(MIRWAYLAND_ABI 5)
+ set(symbol_map ${CMAKE_CURRENT_SOURCE_DIR}/symbols.map)
+ add_compile_definitions(MIR_LOG_COMPONENT_FALLBACK="mirwayland")
+ 
+-add_subdirectory(generator/)
++if (NOT DEFINED MIR_WAYLAND_GENERATOR_EXECUTABLE)
++  add_subdirectory(generator/)
++endif()
+ 
+ set(STANDARD_SOURCES
+   lifetime_tracker.cpp

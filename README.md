@@ -22,7 +22,8 @@ sudo apt update && sudo apt install -y \
     chrpath socat cpio python3 python3-pip python3-pexpect \
     xz-utils debianutils iputils-ping python3-git python3-jinja2 \
     python3-subunit zstd liblz4-tool file locales libacl1 \
-    python3-distutils-extra
+    python3-distutils-extra \
+    libxml++2.6-dev
 ```
 
 ### 2. Fix AppArmor user namespace restriction

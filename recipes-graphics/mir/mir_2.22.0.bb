@@ -10,6 +10,7 @@ LIC_FILES_CHKSUM = " \
 SRC_URI = "git://github.com/canonical/mir.git;protocol=https;branch=main \
            file://0001-make-examples-optional.patch \
            file://0002-allow-external-wayland-generator.patch \
+           file://0003-skip-generator-build-when-external.patch \
 "
 SRCREV = "a73013b3f287b96b89885945e7b2461334f47363"
 S = "${WORKDIR}/git"
@@ -17,7 +18,6 @@ S = "${WORKDIR}/git"
 inherit cmake pkgconfig
 
 DEPENDS = " \
-    mir-wayland-generator-native \
     boost \
     protobuf \
     protobuf-native \
@@ -48,7 +48,7 @@ DEPENDS = " \
 CXXFLAGS:append = " -Wno-deprecated-declarations"
 
 EXTRA_OECMAKE = " \
-    -DMIR_WAYLAND_GENERATOR_EXECUTABLE=${STAGING_BINDIR_NATIVE}/mir_wayland_generator \
+    -DMIR_WAYLAND_GENERATOR_EXECUTABLE=${B}/bin/mir_wayland_generator \
     -DMIR_PLATFORM=gbm-kms \
     -DMIR_ENABLE_TESTS=OFF \
     -DMIR_ENABLE_WLCS_TESTS=OFF \
@@ -56,6 +56,28 @@ EXTRA_OECMAKE = " \
     -DMIR_USE_PREBUILT_GOOGLETEST=OFF \
     -DProtobuf_PROTOC_EXECUTABLE=${STAGING_BINDIR_NATIVE}/protoc \
 "
+
+# Build mir_wayland_generator using the host compiler before cross-compiling.
+# This requires libxml++2.6-dev on the build machine:
+#   sudo apt install libxml++2.6-dev
+do_compile:prepend() {
+    mkdir -p ${B}/bin
+    gen_src="${S}/src/wayland/generator"
+    ${BUILD_CXX} -std=c++17 \
+        $(pkg-config --cflags libxml++-2.6) \
+        ${gen_src}/wrapper_generator.cpp \
+        ${gen_src}/utils.cpp \
+        ${gen_src}/enum.cpp \
+        ${gen_src}/argument.cpp \
+        ${gen_src}/method.cpp \
+        ${gen_src}/request.cpp \
+        ${gen_src}/event.cpp \
+        ${gen_src}/interface.cpp \
+        ${gen_src}/global.cpp \
+        ${gen_src}/emitter.cpp \
+        -o ${B}/bin/mir_wayland_generator \
+        $(pkg-config --libs libxml++-2.6)
+}
 
 PACKAGES =+ "${PN}-graphics-drivers-gbm-kms"
 
