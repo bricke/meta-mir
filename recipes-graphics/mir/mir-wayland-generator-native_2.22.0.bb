@@ -16,6 +16,8 @@ S = "${WORKDIR}/git"
 
 inherit cmake pkgconfig native
 
+FILESEXTRAPATHS:prepend := "${THISDIR}/mir:"
+
 DEPENDS = " \
     libxml++-2.6-native \
     boost-native \
