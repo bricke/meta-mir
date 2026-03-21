@@ -17,6 +17,10 @@ S = "${WORKDIR}/git"
 
 inherit cmake pkgconfig
 
+# lttng-gen-tp is a host tool needed to generate tracepoint code.
+# It is provided by the host system (sudo apt install lttng-tools).
+HOSTTOOLS += "lttng-gen-tp"
+
 DEPENDS = " \
     boost \
     protobuf \
