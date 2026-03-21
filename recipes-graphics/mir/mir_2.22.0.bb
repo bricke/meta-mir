@@ -23,6 +23,7 @@ DEPENDS = " \
     protobuf \
     protobuf-native \
     glib-2.0 \
+    glib-2.0-native \
     libepoxy \
     libinput \
     libxkbcommon \
@@ -91,6 +92,19 @@ do_compile:prepend() {
             -o "${out_dir}/$(basename ${tp_file}).h" \
             -o "${out_dir}/$(basename ${tp_file}).c"
     done
+
+    # Pre-generate gdbus proxy files from D-Bus XML interfaces.
+    # gdbus-codegen is called by CMake without a full path; use the native sysroot tool.
+    gdbus="${STAGING_BINDIR_NATIVE}/gdbus-codegen"
+    console_src="${S}/src/server/console"
+    console_out="${B}/src/server/console"
+    mkdir -p "${console_out}"
+    "${gdbus}" --interface-prefix org.freedesktop.login1 --c-namespace Logind \
+        --header --output "${console_out}/logind-seat.h" \
+        "${console_src}/logind-seat.xml"
+    "${gdbus}" --interface-prefix org.freedesktop.login1 --c-namespace Logind \
+        --body --output "${console_out}/logind-seat.c" \
+        "${console_src}/logind-seat.xml"
 }
 
 PACKAGES =+ "${PN}-graphics-drivers-gbm-kms"
