@@ -15,3 +15,5 @@ S = "${WORKDIR}/libxml++-${PV}"
 SRC_URI[archive.sha256sum] = "74b95302e24dbebc56e97048e86ad0a4121fc82a43e58d381fbe1d380e8eba04"
 
 FILES:${PN}-dev += "${libdir}/libxml++-2.6/include/libxml++config.h"
+
+BBCLASSEXTEND = "native"

@@ -9,6 +9,7 @@ LIC_FILES_CHKSUM = " \
 
 SRC_URI = "git://github.com/canonical/mir.git;protocol=https;branch=main \
            file://0001-make-examples-optional.patch \
+           file://0002-allow-external-wayland-generator.patch \
 "
 SRCREV = "a73013b3f287b96b89885945e7b2461334f47363"
 S = "${WORKDIR}/git"
@@ -16,6 +17,7 @@ S = "${WORKDIR}/git"
 inherit cmake pkgconfig
 
 DEPENDS = " \
+    mir-wayland-generator-native \
     boost \
     protobuf \
     protobuf-native \
@@ -46,6 +48,7 @@ DEPENDS = " \
 CXXFLAGS:append = " -Wno-deprecated-declarations"
 
 EXTRA_OECMAKE = " \
+    -DMIR_WAYLAND_GENERATOR_EXECUTABLE=${STAGING_BINDIR_NATIVE}/mir_wayland_generator \
     -DMIR_PLATFORM=gbm-kms \
     -DMIR_ENABLE_TESTS=OFF \
     -DMIR_ENABLE_WLCS_TESTS=OFF \
