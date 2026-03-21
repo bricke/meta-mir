@@ -10,12 +10,14 @@ Yocto layer providing [Canonical Mir](https://github.com/canonical/mir) — a se
 | `meta-openembedded/meta-oe` | yaml-cpp, lttng-ust, glm, glibmm, libsigc++ |
 | `meta-openembedded/meta-python` | python3-pillow (if examples are enabled) |
 
-## Build machine requirements
+## Setup
 
-Tested on **Ubuntu 24.04 LTS**. Required host packages:
+Tested on **Ubuntu 24.04 LTS**.
+
+### 1. Install host dependencies
 
 ```bash
-sudo apt install -y \
+sudo apt update && sudo apt install -y \
     gawk wget git diffstat unzip texinfo gcc build-essential \
     chrpath socat cpio python3 python3-pip python3-pexpect \
     xz-utils debianutils iputils-ping python3-git python3-jinja2 \
@@ -23,19 +25,45 @@ sudo apt install -y \
     python3-distutils-extra
 ```
 
-### Ubuntu 24.04 AppArmor fix
+### 2. Fix AppArmor user namespace restriction
 
-Yocto requires unprivileged user namespaces, which Ubuntu 24.04 restricts by default:
+Ubuntu 24.04 restricts unprivileged user namespaces by default, which breaks Yocto:
 
 ```bash
-# Apply immediately
 sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-
-# Persist across reboots
 echo 'kernel.apparmor_restrict_unprivileged_userns=0' | sudo tee /etc/sysctl.d/99-yocto.conf
 ```
 
-### `local.conf` requirements
+### 3. Clone layers
+
+```bash
+mkdir -p ~/workspace/yocto && cd ~/workspace/yocto
+git clone --depth=1 -b scarthgap https://github.com/yoctoproject/poky.git
+git clone --depth=1 -b scarthgap https://github.com/openembedded/meta-openembedded.git
+git clone https://github.com/bricke/meta-mir.git
+```
+
+### 4. Initialize the build environment
+
+```bash
+cd ~/workspace/yocto
+source poky/oe-init-build-env build
+```
+
+### 5. Configure `bblayers.conf`
+
+```
+BBLAYERS += " \
+    /home/<user>/workspace/yocto/poky/meta \
+    /home/<user>/workspace/yocto/poky/meta-poky \
+    /home/<user>/workspace/yocto/meta-openembedded/meta-oe \
+    /home/<user>/workspace/yocto/meta-openembedded/meta-python \
+    /home/<user>/workspace/yocto/meta-openembedded/meta-networking \
+    /home/<user>/workspace/yocto/meta-mir \
+"
+```
+
+### 6. Configure `local.conf`
 
 `systemd` requires `usrmerge` in Scarthgap. Add to `build/conf/local.conf`:
 
