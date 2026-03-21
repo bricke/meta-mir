@@ -34,7 +34,6 @@ DEPENDS = " \
     libxcursor \
     glm \
     systemd \
-    egl-wayland \
 "
 
 EXTRA_OECMAKE = " \
