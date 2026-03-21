@@ -7,7 +7,9 @@ LIC_FILES_CHKSUM = " \
     file://COPYING.LGPL2;md5=5f30f0716dfdd0d91eb439ebec522ec2 \
 "
 
-SRC_URI = "git://github.com/canonical/mir.git;protocol=https;branch=main"
+SRC_URI = "git://github.com/canonical/mir.git;protocol=https;branch=main \
+           file://0001-make-examples-optional.patch \
+"
 SRCREV = "a73013b3f287b96b89885945e7b2461334f47363"
 S = "${WORKDIR}/git"
 
@@ -17,7 +19,6 @@ DEPENDS = " \
     boost \
     protobuf \
     protobuf-native \
-    python3-pillow-native \
     glib-2.0 \
     libepoxy \
     libinput \
@@ -44,6 +45,7 @@ EXTRA_OECMAKE = " \
     -DMIR_PLATFORM=gbm-kms \
     -DMIR_ENABLE_TESTS=OFF \
     -DMIR_ENABLE_WLCS_TESTS=OFF \
+    -DMIR_ENABLE_EXAMPLES=OFF \
     -DMIR_USE_PREBUILT_GOOGLETEST=OFF \
     -DProtobuf_PROTOC_EXECUTABLE=${STAGING_BINDIR_NATIVE}/protoc \
 "

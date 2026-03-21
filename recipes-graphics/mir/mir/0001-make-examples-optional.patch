@@ -1,0 +1,18 @@
+From: meta-mir <meta-mir@placeholder>
+Subject: [PATCH] Make examples optional via MIR_ENABLE_EXAMPLES cmake option
+
+Adds a MIR_ENABLE_EXAMPLES option (default ON) so embedded builds can
+skip the examples subdirectory and its PIL/python dependency.
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -300,7 +300,9 @@ add_subdirectory(src/)
+ include_directories(${MIR_GENERATED_INCLUDE_DIRECTORIES})
+
+-add_subdirectory(examples/)
++option(MIR_ENABLE_EXAMPLES "Build examples" ON)
++if (MIR_ENABLE_EXAMPLES)
++  add_subdirectory(examples/)
++endif()
+ add_subdirectory(guides/)
+ add_subdirectory(cmake/)
