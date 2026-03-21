@@ -34,6 +34,7 @@ DEPENDS = " \
     libxcursor \
     glm \
     systemd \
+    libdisplay-info \
 "
 
 EXTRA_OECMAKE = " \
