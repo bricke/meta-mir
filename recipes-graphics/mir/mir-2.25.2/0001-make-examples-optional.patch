@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -364,7 +364,10 @@ add_subdirectory(doc)
+ add_subdirectory(src/)
+
+-add_subdirectory(examples/)
++option(MIR_ENABLE_EXAMPLES "Build examples" ON)
++if (MIR_ENABLE_EXAMPLES)
++  add_subdirectory(examples/)
++endif()
+ add_subdirectory(cmake/)
