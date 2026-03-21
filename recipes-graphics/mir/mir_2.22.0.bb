@@ -35,6 +35,7 @@ DEPENDS = " \
     glm \
     systemd \
     libdisplay-info \
+    pixman \
 "
 
 EXTRA_OECMAKE = " \
