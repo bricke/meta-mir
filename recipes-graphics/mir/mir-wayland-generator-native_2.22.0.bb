@@ -7,7 +7,10 @@ LIC_FILES_CHKSUM = " \
     file://COPYING.LGPL2;md5=5f30f0716dfdd0d91eb439ebec522ec2 \
 "
 
-SRC_URI = "git://github.com/canonical/mir.git;protocol=https;branch=main"
+SRC_URI = "git://github.com/canonical/mir.git;protocol=https;branch=main \
+           file://0001-make-examples-optional.patch \
+           file://0002-allow-external-wayland-generator.patch \
+"
 SRCREV = "a73013b3f287b96b89885945e7b2461334f47363"
 S = "${WORKDIR}/git"
 
@@ -15,13 +18,10 @@ inherit cmake pkgconfig native
 
 DEPENDS = " \
     libxml++-2.6-native \
-    libxml2-native \
-    glibmm-native \
     boost-native \
     protobuf-native \
 "
 
-# Build only the wayland generator tool, nothing else
 EXTRA_OECMAKE = " \
     -DMIR_PLATFORM='' \
     -DMIR_ENABLE_TESTS=OFF \
@@ -30,6 +30,8 @@ EXTRA_OECMAKE = " \
     -DMIR_USE_PREBUILT_GOOGLETEST=OFF \
     -DProtobuf_PROTOC_EXECUTABLE=${STAGING_BINDIR_NATIVE}/protoc \
 "
+
+EXTRA_OECMAKE:append = " -DMIR_WAYLAND_GENERATOR_EXECUTABLE=${B}/bin/mir_wayland_generator"
 
 do_install() {
     install -d ${D}${bindir}
