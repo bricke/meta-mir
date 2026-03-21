@@ -17,9 +17,6 @@ S = "${WORKDIR}/git"
 
 inherit cmake pkgconfig
 
-# lttng-gen-tp is a host tool needed to generate tracepoint code.
-# It is provided by the host system (sudo apt install lttng-tools).
-HOSTTOOLS += "lttng-gen-tp"
 
 DEPENDS = " \
     boost \
@@ -62,8 +59,8 @@ EXTRA_OECMAKE = " \
 "
 
 # Build mir_wayland_generator using the host compiler before cross-compiling.
-# This requires libxml++2.6-dev on the build machine:
-#   sudo apt install libxml++2.6-dev
+# Pre-generate lttng tracepoint files so ninja does not need lttng-gen-tp in PATH.
+# Host requirements: sudo apt install libxml++2.6-dev liblttng-ust-dev
 do_compile:prepend() {
     mkdir -p ${B}/bin
     gen_src="${S}/src/wayland/generator"
@@ -81,6 +78,19 @@ do_compile:prepend() {
         ${gen_src}/emitter.cpp \
         -o ${B}/bin/mir_wayland_generator \
         $(pkg-config --libs libxml++-2.6)
+
+    # Pre-generate lttng tracepoint .h/.c files using the full host path.
+    # CMake add_custom_command calls lttng-gen-tp without a full path; ninja's
+    # sanitized shell may not find it even with HOSTTOOLS. Pre-generating the
+    # outputs here causes ninja to skip the generation step (outputs already exist).
+    find ${S} -name "*.tp" | while read tp_file; do
+        rel=$(realpath --relative-to="${S}" "${tp_file}")
+        out_dir="${B}/$(dirname ${rel})"
+        mkdir -p "${out_dir}"
+        /usr/bin/lttng-gen-tp "${tp_file}" \
+            -o "${out_dir}/$(basename ${tp_file}).h" \
+            -o "${out_dir}/$(basename ${tp_file}).c"
+    done
 }
 
 PACKAGES =+ "${PN}-graphics-drivers-gbm-kms"

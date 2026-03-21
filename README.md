@@ -24,7 +24,8 @@ sudo apt update && sudo apt install -y \
     python3-subunit zstd liblz4-tool file locales libacl1 \
     python3-distutils-extra \
     libxml++2.6-dev \
-    lttng-tools
+    lttng-tools \
+    liblttng-ust-dev
 ```
 
 ### 2. Fix AppArmor user namespace restriction
