@@ -41,6 +41,10 @@ DEPENDS = " \
     pixman \
 "
 
+# libxml++-2.6 headers use std::auto_ptr which is deprecated in C++17/23.
+# Suppress the warning to avoid -Werror turning it into a build failure.
+CXXFLAGS:append = " -Wno-deprecated-declarations"
+
 EXTRA_OECMAKE = " \
     -DMIR_PLATFORM=gbm-kms \
     -DMIR_ENABLE_TESTS=OFF \
