@@ -43,6 +43,7 @@ DEPENDS = " \
     systemd \
     libdisplay-info \
     pixman \
+    gmp \
 "
 
 # libxml++-2.6 headers use std::auto_ptr which is deprecated in C++17/23.
