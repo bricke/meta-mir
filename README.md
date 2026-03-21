@@ -2,6 +2,8 @@
 
 Yocto layer providing [Canonical Mir](https://github.com/canonical/mir) — a set of shared libraries for building Wayland compositors.
 
+Tested on **Yocto Scarthgap (5.0 LTS)**, targeting **Raspberry Pi 4 (aarch64)**, built on **Ubuntu 24.04 LTS**.
+
 ## Layer dependencies
 
 | Layer | Purpose |
@@ -9,10 +11,25 @@ Yocto layer providing [Canonical Mir](https://github.com/canonical/mir) — a se
 | `poky/meta` (oe-core) | Base layer |
 | `meta-openembedded/meta-oe` | yaml-cpp, lttng-ust, glm, glibmm, libsigc++ |
 | `meta-openembedded/meta-python` | python3-pillow (if examples are enabled) |
+| `meta-openembedded/meta-networking` | Optional networking support |
+
+## Provided recipes
+
+| Recipe | Description |
+|--------|-------------|
+| `mir` | Mir display server libraries and Miral toolkit (cross-compiled for target) |
+| `libxml++-2.6` | C++ XML library 2.6 API series (required by Mir's Wayland generator) |
+| `libdisplay-info` | EDID/DisplayID parsing library (required by Mir's gbm-kms platform) |
+
+## Packages
+
+| Package | Contents |
+|---------|----------|
+| `mir` | Runtime shared libraries |
+| `mir-dev` | Headers and pkg-config files |
+| `mir-graphics-drivers-gbm-kms` | KMS/DRM platform plugin and evdev input plugin |
 
 ## Setup
-
-Tested on **Ubuntu 24.04 LTS**.
 
 ### 1. Install host dependencies
 
@@ -28,9 +45,13 @@ sudo apt update && sudo apt install -y \
     liblttng-ust-dev
 ```
 
+- `libxml++2.6-dev` — required to build `mir_wayland_generator` on the host (x86_64) before cross-compilation
+- `lttng-tools` — provides the `lttng` CLI (runtime dependency)
+- `liblttng-ust-dev` — provides `/usr/bin/lttng-gen-tp`, the tracepoint code generator
+
 ### 2. Fix AppArmor user namespace restriction
 
-Ubuntu 24.04 restricts unprivileged user namespaces by default, which breaks Yocto:
+Ubuntu 24.04 restricts unprivileged user namespaces by default, which breaks Yocto's sandbox:
 
 ```bash
 sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
@@ -75,48 +96,35 @@ DISTRO_FEATURES:append = " systemd usrmerge"
 VIRTUAL-RUNTIME_init_manager = "systemd"
 ```
 
-## Usage
-
-Add to `bblayers.conf`:
-
-```
-BBLAYERS += " \
-    /path/to/meta-openembedded/meta-oe \
-    /path/to/meta-openembedded/meta-python \
-    /path/to/meta-mir \
-"
-```
-
-Build:
+### 7. Build
 
 ```bash
 bitbake mir
 ```
 
-## Provided recipes
-
-| Recipe | Description |
-|--------|-------------|
-| `mir` | Mir display server libraries and Miral toolkit (cross-compiled for target) |
-| `mir-wayland-generator-native` | Wayland protocol wrapper generator (built for host, used during cross-compilation) |
-| `libxml++-2.6` | C++ XML library 2.6 API series (required by Mir's wayland generator) |
-| `libdisplay-info` | EDID/DisplayID parsing library (required by Mir platform) |
-
-## Packages
-
-| Package | Contents |
-|---------|----------|
-| `mir` | Runtime shared libraries |
-| `mir-dev` | Headers and pkg-config files |
-| `mir-graphics-drivers-gbm-kms` | KMS/DRM platform plugin |
-
 ## Notes
 
+### Build platform
+
 - Builds only the `gbm-kms` platform — no X11, no Wayland nesting, no NVIDIA egl-wayland
-- Tests and examples disabled
-- `mir_wayland_generator` is built natively (x86_64) to avoid cross-compilation exec format errors
+- Tests and examples are disabled
+
+### Cross-compilation workarounds
+
+Several of Mir's build steps require host-architecture tools to generate source files before the cross-compiler runs. Bitbake's sanitized task environment does not reliably expose these tools to ninja subprocesses even when declared via `HOSTTOOLS`, so the recipe pre-generates all outputs in `do_compile:prepend`.
+
+**`mir_wayland_generator`** — Mir's Wayland protocol wrapper generator must run on the host (x86_64). It is compiled from source in `do_compile:prepend` using `${BUILD_CXX}` and the host's `libxml++2.6-dev`. Three patches are applied to allow passing the generator path via a CMake variable and to skip its in-tree build.
+
+**`lttng-gen-tp`** — Generates LTTng tracepoint `.h`/`.c` files from `.tp` sources. Provided by `liblttng-ust-dev` (not `lttng-tools`). Pre-generated in `do_compile:prepend` using `/usr/bin/lttng-gen-tp`. If you ever need to debug this manually, the HOSTTOOLS symlink can be created with:
+```bash
+ln -sf /usr/bin/lttng-gen-tp ~/workspace/yocto/build/tmp/hosttools/lttng-gen-tp
+```
+
+**`gdbus-codegen`** — Generates D-Bus GLib proxy code from `.xml` interface files (used for logind seat/session support). Provided by `glib-2.0-native` (in DEPENDS). Pre-generated in `do_compile:prepend` using `${STAGING_BINDIR_NATIVE}/gdbus-codegen`.
+
+### Dependencies
+
 - `libxml++-2.6` uses `std::auto_ptr` which is deprecated in C++23 — `-Wno-deprecated-declarations` is applied to the Mir build to suppress the `-Werror` failure
-- `lttng-gen-tp` is provided by `liblttng-ust-dev` (not `lttng-tools`). Bitbake's `HOSTTOOLS` mechanism does not reliably expose the tool to ninja subprocesses, so the recipe pre-generates the `.tp` outputs in `do_compile:prepend` using the full path `/usr/bin/lttng-gen-tp`. If for any reason the pre-generation fails, you can also manually create the symlink that `HOSTTOOLS` should have created:
-  ```bash
-  ln -sf /usr/bin/lttng-gen-tp ~/workspace/yocto/build/tmp/hosttools/lttng-gen-tp
-  ```
+- `libdisplay-info` is not available in meta-oe Scarthgap — a custom recipe is provided in this layer
+- `libxml++-2.6` (2.x API) is not available in meta-oe Scarthgap (only 5.x) — a custom recipe is provided in this layer
+- `gmp` is required by Miral (`gmpxx.h`) and is pulled from `poky/meta`
