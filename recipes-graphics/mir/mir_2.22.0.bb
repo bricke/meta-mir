@@ -26,7 +26,6 @@ DEPENDS = " \
     wayland-native \
     wayland-protocols \
     freetype \
-    libxml++-2.6 \
     yaml-cpp \
     lttng-ust \
     libxcb \
