@@ -17,6 +17,7 @@ DEPENDS = " \
     boost \
     protobuf \
     protobuf-native \
+    python3-pillow-native \
     glib-2.0 \
     libepoxy \
     libinput \
