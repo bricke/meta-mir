@@ -1,7 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -364,7 +364,10 @@ add_subdirectory(doc)
+@@ -304,7 +304,10 @@ include(JoinPaths)
+ add_subdirectory(doc)
  add_subdirectory(src/)
 
 -add_subdirectory(examples/)
@@ -10,3 +11,5 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 +  add_subdirectory(examples/)
 +endif()
  add_subdirectory(cmake/)
+
+ if (MIR_ENABLE_TESTS)
