@@ -21,6 +21,15 @@ Tested on **Yocto Scarthgap (5.0 LTS)**, targeting **Raspberry Pi 4 (aarch64)**,
 | `libxml++-2.6` | C++ XML library 2.6 API series (required by Mir's Wayland generator) |
 | `libdisplay-info` | EDID/DisplayID parsing library (required by Mir's gbm-kms platform) |
 
+### Available Mir versions
+
+| Recipe file | Mir version | Notes |
+|-------------|-------------|-------|
+| `mir_2.25.2.bb` | 2.25.2 | **Recommended.** Latest stable release. Introduces `miral::FocusStealing`. |
+| `mir_2.22.0.bb` | 2.22.0 | Older version, kept for reference. Pinned to a main-branch commit. |
+
+Bitbake selects the highest version automatically. Both recipes use the same patches (2.25.2 has version-specific patches in `mir-2.25.2/`).
+
 ## Packages
 
 | Package | Contents |
