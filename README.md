@@ -73,7 +73,7 @@ echo 'kernel.apparmor_restrict_unprivileged_userns=0' | sudo tee /etc/sysctl.d/9
 mkdir -p ~/workspace/yocto && cd ~/workspace/yocto
 git clone --depth=1 -b scarthgap https://github.com/yoctoproject/poky.git
 git clone --depth=1 -b scarthgap https://github.com/openembedded/meta-openembedded.git
-git clone https://github.com/bricke/meta-mir.git
+git clone -b scarthgap https://github.com/bricke/meta-mir.git
 ```
 
 ### 4. Initialize the build environment
