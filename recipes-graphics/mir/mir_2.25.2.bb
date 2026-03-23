@@ -33,7 +33,6 @@ DEPENDS = " \
     wayland-native \
     wayland-protocols \
     freetype \
-    libxml++-2.6 \
     yaml-cpp \
     lttng-ust \
     libxcb \
@@ -46,9 +45,6 @@ DEPENDS = " \
     gmp \
 "
 
-# libxml++-2.6 headers use std::auto_ptr which is deprecated in C++17/23.
-# Suppress the warning to avoid -Werror turning it into a build failure.
-CXXFLAGS:append = " -Wno-deprecated-declarations"
 
 EXTRA_OECMAKE = " \
     -DMIR_WAYLAND_GENERATOR_EXECUTABLE=${B}/bin/mir_wayland_generator \
