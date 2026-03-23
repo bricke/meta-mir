@@ -12,6 +12,7 @@ SRC_URI = "git://github.com/canonical/mir.git;protocol=https;branch=main \
            file://0002-allow-external-wayland-generator.patch \
            file://0003-skip-generator-build-when-external.patch \
            file://libxmlpp_compat.h \
+           file://lttng-gen-tp \
 "
 SRCREV = "067796760870c314d4e4da42d22bedefdbb3129e"
 S = "${WORKDIR}/git"
@@ -36,7 +37,6 @@ DEPENDS = " \
     freetype \
     yaml-cpp \
     lttng-ust \
-    lttng-ust-native \
     libxcb \
     libx11 \
     libxcursor \
@@ -97,7 +97,7 @@ do_compile:prepend() {
         rel=$(realpath --relative-to="${S}" "${tp_file}")
         out_dir="${B}/$(dirname ${rel})"
         mkdir -p "${out_dir}"
-        ${STAGING_BINDIR_NATIVE}/lttng-gen-tp "${tp_file}" \
+        python3 ${WORKDIR}/lttng-gen-tp "${tp_file}" \
             -o "${out_dir}/$(basename ${tp_file}).h" \
             -o "${out_dir}/$(basename ${tp_file}).c"
     done

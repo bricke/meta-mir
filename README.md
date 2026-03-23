@@ -109,7 +109,7 @@ Several of Mir's build steps require host-architecture tools to generate source 
 
 **`mir_wayland_generator`** — Mir's Wayland protocol wrapper generator must run on the host (x86_64). It is compiled from source in `do_compile:prepend` using `${BUILD_CXX}` and `libxml2-native` (built automatically by Yocto). A compatibility shim (`libxmlpp_compat.h`) provides the `xmlpp` API over `libxml2` so no host `libxml++2.6-dev` package is needed. Three patches are applied to allow passing the generator path via a CMake variable and to skip its in-tree build.
 
-**`lttng-gen-tp`** — Generates LTTng tracepoint `.h`/`.c` files from `.tp` sources. Provided by `lttng-ust-native` (in DEPENDS). Pre-generated in `do_compile:prepend` using `${STAGING_BINDIR_NATIVE}/lttng-gen-tp`.
+**`lttng-gen-tp`** — Generates LTTng tracepoint `.h`/`.c` files from `.tp` sources. Bundled from lttng-ust v2.13.8 in `SRC_URI` (no native recipe exists for lttng-ust). Pre-generated in `do_compile:prepend` using the host's `python3`.
 
 **`gdbus-codegen`** — Generates D-Bus GLib proxy code from `.xml` interface files (used for logind seat/session support). Provided by `glib-2.0-native` (in DEPENDS). Pre-generated in `do_compile:prepend` using `${STAGING_BINDIR_NATIVE}/gdbus-codegen`.
 
