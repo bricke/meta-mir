@@ -36,6 +36,7 @@ DEPENDS = " \
     freetype \
     yaml-cpp \
     lttng-ust \
+    lttng-ust-native \
     libxcb \
     libx11 \
     libxcursor \
@@ -60,8 +61,7 @@ EXTRA_OECMAKE = " \
 
 # Build mir_wayland_generator using the host compiler before cross-compiling.
 # Pre-generate lttng tracepoint files so ninja does not need lttng-gen-tp in PATH.
-# Host requirements: sudo apt install liblttng-ust-dev
-# libxml++ is replaced by a compatibility shim over libxml2-native (no host package needed).
+# No manual host packages required — all build tools come from Yocto native recipes.
 do_compile:prepend() {
     mkdir -p ${B}/bin
     gen_src="${S}/src/wayland/generator"
@@ -97,7 +97,7 @@ do_compile:prepend() {
         rel=$(realpath --relative-to="${S}" "${tp_file}")
         out_dir="${B}/$(dirname ${rel})"
         mkdir -p "${out_dir}"
-        /usr/bin/lttng-gen-tp "${tp_file}" \
+        ${STAGING_BINDIR_NATIVE}/lttng-gen-tp "${tp_file}" \
             -o "${out_dir}/$(basename ${tp_file}).h" \
             -o "${out_dir}/$(basename ${tp_file}).c"
     done
