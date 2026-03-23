@@ -11,6 +11,7 @@ SRC_URI = "git://github.com/canonical/mir.git;protocol=https;branch=main \
            file://0001-make-examples-optional.patch \
            file://0002-allow-external-wayland-generator.patch \
            file://0003-skip-generator-build-when-external.patch \
+           file://libxmlpp_compat.h \
 "
 SRCREV = "067796760870c314d4e4da42d22bedefdbb3129e"
 S = "${WORKDIR}/git"
@@ -43,6 +44,7 @@ DEPENDS = " \
     libdisplay-info \
     pixman \
     gmp \
+    libxml2-native \
 "
 
 
@@ -58,12 +60,20 @@ EXTRA_OECMAKE = " \
 
 # Build mir_wayland_generator using the host compiler before cross-compiling.
 # Pre-generate lttng tracepoint files so ninja does not need lttng-gen-tp in PATH.
-# Host requirements: sudo apt install libxml++2.6-dev liblttng-ust-dev
+# Host requirements: sudo apt install liblttng-ust-dev
+# libxml++ is replaced by a compatibility shim over libxml2-native (no host package needed).
 do_compile:prepend() {
     mkdir -p ${B}/bin
     gen_src="${S}/src/wayland/generator"
+
+    # Provide libxmlpp_compat.h as a drop-in for <libxml++/libxml++.h> so the
+    # generator compiles against libxml2-native with no host libxml++2.6-dev.
+    mkdir -p ${B}/libxml_compat_include/libxml++
+    cp ${WORKDIR}/libxmlpp_compat.h ${B}/libxml_compat_include/libxml++/libxml++.h
+
     ${BUILD_CXX} -std=c++17 \
-        $(pkg-config --cflags libxml++-2.6) \
+        -I${B}/libxml_compat_include \
+        -I${STAGING_INCDIR_NATIVE}/libxml2 \
         ${gen_src}/wrapper_generator.cpp \
         ${gen_src}/utils.cpp \
         ${gen_src}/enum.cpp \
@@ -75,7 +85,9 @@ do_compile:prepend() {
         ${gen_src}/global.cpp \
         ${gen_src}/emitter.cpp \
         -o ${B}/bin/mir_wayland_generator \
-        $(pkg-config --libs libxml++-2.6)
+        -L${STAGING_LIBDIR_NATIVE} \
+        -Wl,-rpath,${STAGING_LIBDIR_NATIVE} \
+        -lxml2
 
     # Pre-generate lttng tracepoint .h/.c files using the full host path.
     # CMake add_custom_command calls lttng-gen-tp without a full path; ninja's
