@@ -12,6 +12,7 @@ SRC_URI = "git://github.com/canonical/mir.git;protocol=https;branch=main \
            file://0002-allow-external-wayland-generator.patch \
            file://0003-skip-generator-build-when-external.patch \
            file://libxmlpp_compat.h \
+           file://lttng-gen-tp \
 "
 SRCREV = "067796760870c314d4e4da42d22bedefdbb3129e"
 S = "${WORKDIR}/git"
@@ -60,8 +61,7 @@ EXTRA_OECMAKE = " \
 
 # Build mir_wayland_generator using the host compiler before cross-compiling.
 # Pre-generate lttng tracepoint files so ninja does not need lttng-gen-tp in PATH.
-# Host requirements: sudo apt install liblttng-ust-dev
-# libxml++ is replaced by a compatibility shim over libxml2-native (no host package needed).
+# No manual host packages required — all build tools come from Yocto native recipes.
 do_compile:prepend() {
     mkdir -p ${B}/bin
     gen_src="${S}/src/wayland/generator"
@@ -97,7 +97,7 @@ do_compile:prepend() {
         rel=$(realpath --relative-to="${S}" "${tp_file}")
         out_dir="${B}/$(dirname ${rel})"
         mkdir -p "${out_dir}"
-        /usr/bin/lttng-gen-tp "${tp_file}" \
+        python3 ${WORKDIR}/lttng-gen-tp "${tp_file}" \
             -o "${out_dir}/$(basename ${tp_file}).h" \
             -o "${out_dir}/$(basename ${tp_file}).c"
     done

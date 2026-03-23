@@ -38,13 +38,10 @@ sudo apt update && sudo apt install -y \
     chrpath socat cpio python3 python3-pip python3-pexpect \
     xz-utils debianutils iputils-ping python3-git python3-jinja2 \
     python3-subunit zstd liblz4-tool file locales libacl1 \
-    python3-distutils-extra \
-    lttng-tools \
-    liblttng-ust-dev
+    python3-distutils-extra
 ```
 
-- `lttng-tools` — provides the `lttng` CLI (runtime dependency)
-- `liblttng-ust-dev` — provides `/usr/bin/lttng-gen-tp`, the tracepoint code generator
+These are the standard Yocto host dependencies. No additional packages (like `libxml++2.6-dev` or `liblttng-ust-dev`) are required — all build tools are provided by Yocto native recipes.
 
 ### 2. Fix AppArmor user namespace restriction
 
@@ -112,10 +109,7 @@ Several of Mir's build steps require host-architecture tools to generate source 
 
 **`mir_wayland_generator`** — Mir's Wayland protocol wrapper generator must run on the host (x86_64). It is compiled from source in `do_compile:prepend` using `${BUILD_CXX}` and `libxml2-native` (built automatically by Yocto). A compatibility shim (`libxmlpp_compat.h`) provides the `xmlpp` API over `libxml2` so no host `libxml++2.6-dev` package is needed. Three patches are applied to allow passing the generator path via a CMake variable and to skip its in-tree build.
 
-**`lttng-gen-tp`** — Generates LTTng tracepoint `.h`/`.c` files from `.tp` sources. Provided by `liblttng-ust-dev` (not `lttng-tools`). Pre-generated in `do_compile:prepend` using `/usr/bin/lttng-gen-tp`. If you ever need to debug this manually, the HOSTTOOLS symlink can be created with:
-```bash
-ln -sf /usr/bin/lttng-gen-tp ~/workspace/yocto/build/tmp/hosttools/lttng-gen-tp
-```
+**`lttng-gen-tp`** — Generates LTTng tracepoint `.h`/`.c` files from `.tp` sources. Bundled from lttng-ust v2.13.8 in `SRC_URI` (no native recipe exists for lttng-ust). Pre-generated in `do_compile:prepend` using the host's `python3`.
 
 **`gdbus-codegen`** — Generates D-Bus GLib proxy code from `.xml` interface files (used for logind seat/session support). Provided by `glib-2.0-native` (in DEPENDS). Pre-generated in `do_compile:prepend` using `${STAGING_BINDIR_NATIVE}/gdbus-codegen`.
 
