@@ -13,9 +13,10 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
+#include <optional>
 #include <string>
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 namespace xmlpp {
 
@@ -38,28 +39,20 @@ public:
 
     std::string get_name() const
     {
-        return n_ ? reinterpret_cast<const char*>(n_->name) : "";
+        return n_ ? from_xml(n_->name) : "";
     }
 
+    /* Returns the attribute value, or "" if the attribute is absent. */
     std::string get_attribute_value(const std::string& name) const
     {
-        if (!n_) return "";
-        xmlChar* val = xmlGetProp(n_, reinterpret_cast<const xmlChar*>(name.c_str()));
-        if (!val) return "";
-        std::string result(reinterpret_cast<const char*>(val));
-        xmlFree(val);
-        return result;
+        return get_prop(name).value_or("");
     }
 
     /* Returns a heap-allocated Attribute if the attribute exists, nullptr otherwise. */
     Attribute* get_attribute(const std::string& name) const
     {
-        if (!n_) return nullptr;
-        xmlChar* val = xmlGetProp(n_, reinterpret_cast<const xmlChar*>(name.c_str()));
-        if (!val) return nullptr;
-        std::string result(reinterpret_cast<const char*>(val));
-        xmlFree(val);
-        return new Attribute(result);
+        auto v = get_prop(name);
+        return v ? new Attribute(*v) : nullptr;
     }
 
     Node* get_parent() const;
@@ -73,6 +66,20 @@ public:
 
 protected:
     xmlNodePtr n_;
+
+private:
+    static const xmlChar* to_xml(const char* s)  { return reinterpret_cast<const xmlChar*>(s); }
+    static std::string    from_xml(const xmlChar* s) { return reinterpret_cast<const char*>(s); }
+
+    std::optional<std::string> get_prop(const std::string& name) const
+    {
+        if (!n_) return std::nullopt;
+        xmlChar* val = xmlGetProp(n_, to_xml(name.c_str()));
+        if (!val) return std::nullopt;
+        std::string result = from_xml(val);
+        xmlFree(val);
+        return result;
+    }
 };
 
 class Element : public Node {
@@ -126,7 +133,7 @@ inline NodeSet Node::get_children(const std::string& name) const
     for (xmlNodePtr c = n_->children; c; c = c->next)
     {
         if (c->type != XML_ELEMENT_NODE) continue;
-        if (name.empty() || name == reinterpret_cast<const char*>(c->name))
+        if (name.empty() || name == from_xml(c->name))
             result.push_back(new Element(c));
     }
     return result;
@@ -141,9 +148,7 @@ inline NodeSet Node::find(const std::string& xpath) const
     if (!ctx) return result;
     ctx->node = n_;
 
-    xmlXPathObjectPtr obj = xmlXPathEvalExpression(
-        reinterpret_cast<const xmlChar*>(xpath.c_str()), ctx);
-
+    xmlXPathObjectPtr obj = xmlXPathEvalExpression(to_xml(xpath.c_str()), ctx);
     if (obj)
     {
         if (obj->type == XPATH_NODESET && obj->nodesetval)
