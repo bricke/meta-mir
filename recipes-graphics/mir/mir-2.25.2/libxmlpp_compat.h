@@ -22,6 +22,15 @@ namespace xmlpp {
 class Element;
 using NodeSet = std::vector<Element*>;
 
+/* Represents a single XML attribute. Returned by Node::get_attribute(). */
+class Attribute {
+public:
+    explicit Attribute(const std::string& value) : value_(value) {}
+    std::string get_value() const { return value_; }
+private:
+    std::string value_;
+};
+
 class Node {
 public:
     explicit Node(xmlNodePtr n) : n_(n) {}
@@ -40,6 +49,17 @@ public:
         std::string result(reinterpret_cast<const char*>(val));
         xmlFree(val);
         return result;
+    }
+
+    /* Returns a heap-allocated Attribute if the attribute exists, nullptr otherwise. */
+    Attribute* get_attribute(const std::string& name) const
+    {
+        if (!n_) return nullptr;
+        xmlChar* val = xmlGetProp(n_, reinterpret_cast<const xmlChar*>(name.c_str()));
+        if (!val) return nullptr;
+        std::string result(reinterpret_cast<const char*>(val));
+        xmlFree(val);
+        return new Attribute(result);
     }
 
     Node* get_parent() const;
