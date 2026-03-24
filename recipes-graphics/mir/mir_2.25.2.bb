@@ -11,6 +11,7 @@ SRC_URI = "git://github.com/canonical/mir.git;protocol=https;branch=main \
            file://0001-make-examples-optional.patch \
            file://0002-allow-external-wayland-generator.patch \
            file://0003-skip-generator-build-when-external.patch \
+           file://0004-remove-unused-xcursor-dependency.patch \
            file://libxmlpp_compat.h \
            file://lttng-gen-tp \
 "
@@ -37,8 +38,7 @@ DEPENDS = " \
     freetype \
     yaml-cpp \
     lttng-ust \
-    libxcursor \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'libxcb libx11', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'libxcb libx11 libxcursor', '', d)} \
     glm \
     systemd \
     libdisplay-info \
