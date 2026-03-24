@@ -1,5 +1,7 @@
 # meta-mir
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Yocto layer providing [Canonical Mir](https://github.com/canonical/mir) — a set of shared libraries for building Wayland compositors.
 
 Tested on **Yocto Scarthgap (5.0 LTS)**, targeting **Raspberry Pi 4 (aarch64)**, built on **Ubuntu 24.04 LTS**.
