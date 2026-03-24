@@ -1,19 +1,25 @@
 From: meta-mir <meta-mir@bricke>
-Subject: [PATCH] Remove unused xcursor pkg_check_modules from root CMakeLists.txt
+Subject: [PATCH] Remove X11/XCB unconditional pkg_check_modules for GBM-only builds
 
-X11_XCURSOR is declared REQUIRED at the top level but never referenced
-in any subdirectory CMakeLists.txt. Remove the dead check so Mir can
-be built without xcursor on non-X11 platforms.
+xcursor is declared REQUIRED at the top level but never referenced anywhere.
+xcb and its sub-libraries are only used by the X11 platform code; when building
+with -DMIR_PLATFORM=gbm-kms none of those targets are needed.  Remove all seven
+unconditional X11/XCB checks so Mir can be built without any X11 packages on
+non-X11 platforms.
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 1234567..abcdefg 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -268,7 +268,6 @@ pkg_check_modules(UDEV REQUIRED IMPORTED_TARGET libudev)
+@@ -268,11 +268,4 @@ pkg_check_modules(UDEV REQUIRED IMPORTED_TARGET libudev)
  pkg_check_modules(UUID REQUIRED IMPORTED_TARGET uuid)
  pkg_check_modules(WAYLAND_CLIENT REQUIRED IMPORTED_TARGET wayland-client)
  pkg_check_modules(WAYLAND_SERVER REQUIRED IMPORTED_TARGET wayland-server)
 -pkg_check_modules(X11_XCURSOR REQUIRED IMPORTED_TARGET xcursor)
- pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb)
- pkg_check_modules(XCB_COMPOSITE REQUIRED IMPORTED_TARGET xcb-composite)
- pkg_check_modules(XCB_RANDR REQUIRED IMPORTED_TARGET xcb-randr)
+-pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb)
+-pkg_check_modules(XCB_COMPOSITE REQUIRED IMPORTED_TARGET xcb-composite)
+-pkg_check_modules(XCB_RANDR REQUIRED IMPORTED_TARGET xcb-randr)
+-pkg_check_modules(XCB_RENDER REQUIRED IMPORTED_TARGET xcb-render)
+-pkg_check_modules(XCB_RES REQUIRED IMPORTED_TARGET xcb-res)
+-pkg_check_modules(XCB_XFIXES REQUIRED IMPORTED_TARGET xcb-xfixes)
+ pkg_check_modules(XKBCOMMON REQUIRED IMPORTED_TARGET xkbcommon)
