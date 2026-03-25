@@ -37,7 +37,9 @@ DEPENDS = " \
     freetype \
     yaml-cpp \
     lttng-ust \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'libxcb libx11 libxcursor', '', d)} \
+    libxcb \
+    libxcursor \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'libx11', '', d)} \
     glm \
     systemd \
     libdisplay-info \
